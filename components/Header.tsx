@@ -16,7 +16,7 @@ const Header = () => {
                 </Link>
             </div>
             <div>
-                <h1 className='text-xl font-semibold tracking-wide'>Lista de compras</h1>
+                <h1 className='text-xl font-semibold tracking-wide'>App lista de compras</h1>
             </div>
         </header>
     )

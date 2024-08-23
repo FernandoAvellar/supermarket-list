@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const formSchema = z.object({
+export const item = z.object({
     produto: z.string().min(3, {
         message: "Nome do produto deve conter no mínimo 3 letras",
     }),
@@ -14,10 +14,12 @@ export const formSchema = z.object({
 })
 
 export const categorias = [
-    { label: "Limpeza", value: "limpeza" },
-    { label: "Frios", value: "frios" },
+    { label: "Bebidas", value: "bebidas" },
     { label: "Carnes", value: "carnes" },
-    { label: "Verduras e Frutas", value: "verduras" },
     { label: "Diversos", value: "diversos" },
+    { label: "Frios", value: "frios" },
     { label: "Higiene pessoal", value: "higiene" },
+    { label: "Limpeza", value: "limpeza" },
+    { label: "Padaria", value: "padaria" },
+    { label: "Verduras e Frutas", value: "verduras" },
 ] as const

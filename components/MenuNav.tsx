@@ -10,28 +10,28 @@ import {
 } from "@/components/ui/navigation-menu"
 import Link from 'next/link'
 
-const ManuNav = () => {
+const MenuNav = () => {
     return (
         <nav className='flex gap-4 p-3  items-center justify-center'>
             <NavigationMenu>
                 <NavigationMenuList>
                     <NavigationMenuItem>
                         <Link href="/comprar" legacyBehavior passHref>
-                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                            <NavigationMenuLink className={`${navigationMenuTriggerStyle()} bg-gray-500 font-semibold`}>
                                 COMPRAR
                             </NavigationMenuLink>
                         </Link>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <Link href="/comprado" legacyBehavior passHref>
-                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                COMPRADO
+                        <Link href="/historico" legacyBehavior passHref>
+                            <NavigationMenuLink className={`${navigationMenuTriggerStyle()} bg-blue-500 font-semibold`}>
+                                HISTÓRICO
                             </NavigationMenuLink>
                         </Link>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                         <Link href="/inserir" legacyBehavior passHref>
-                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                            <NavigationMenuLink className={`${navigationMenuTriggerStyle()} bg-green-500 font-semibold`}>
                                 INSERIR
                             </NavigationMenuLink>
                         </Link>
@@ -42,4 +42,4 @@ const ManuNav = () => {
     )
 }
 
-export default ManuNav
+export default MenuNav

@@ -1,11 +1,11 @@
 "use client"
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Input } from "@/components/ui/input"
-import { categorias, cn, formSchema } from "@/lib/utils"
+import { categorias, cn, item } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
     Command,
@@ -29,24 +29,40 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
+const InsertPage = () => {
+    const [shoppingList, setShoppingList] = useState<Array<{ id: number; produto: string; categoria: string }>>([]);
 
-const page = () => {
+    useEffect(() => {
+        const existingItems = localStorage.getItem('shoppingList');
+        if (existingItems) {
+            setShoppingList(JSON.parse(existingItems));
+        }
+    }, []);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<z.infer<typeof item>>({
+        resolver: zodResolver(item),
         defaultValues: {
             produto: "",
             categoria: "diversos",
         },
     })
 
-    function onSubmit(data: z.infer<typeof formSchema>) {
-        console.log(data)
+    function generateId() {
+        // Generate a unique ID based on the current timestamp and a random number
+        return Date.now() + Math.floor(Math.random() * 1000);
+    }
+
+    function onSubmit(data: z.infer<typeof item>) {
+        const newItem = { id: generateId(), ...data }; // Add a unique id to each item
+        const updatedList = [...shoppingList, newItem];
+        setShoppingList(updatedList);
+        localStorage.setItem('shoppingList', JSON.stringify(updatedList));
+        form.reset();
     }
 
     return (
         <Form {...form}>
-            <div className='flex flex-col gap-2 w-3/4 items-center p-4'>
+            <div className='flex flex-col gap-2 w-fit mx-auto items-center p-4 bg-gray-100 rounded-md'>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
                         control={form.control}
@@ -124,11 +140,11 @@ const page = () => {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit">Cadastrar</Button>
+                    <Button type="submit" className='w-full bg-blue-500 text-sm'>INSERIR</Button>
                 </form>
             </div>
         </Form>
     )
 }
 
-export default page
+export default InsertPage;
