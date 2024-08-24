@@ -1,8 +1,6 @@
 import React from 'react'
 import {
     NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuIndicator,
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
@@ -12,7 +10,7 @@ import Link from 'next/link'
 
 const MenuNav = () => {
     return (
-        <nav className='flex gap-4 p-3  items-center justify-center'>
+        <nav className='flex p-3 items-center justify-center'>
             <NavigationMenu>
                 <NavigationMenuList>
                     <NavigationMenuItem>

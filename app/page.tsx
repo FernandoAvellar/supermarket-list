@@ -6,8 +6,8 @@ export default function Home() {
       <div className="flex flex-grow items-center justify-center w-full">
         <Image
           src='/images/cover.jpg'
-          width={300}
-          height={300}
+          width={350}
+          height={350}
           alt='Supermarket image'
         />
       </div>

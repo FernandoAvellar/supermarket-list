@@ -45,11 +45,11 @@ const HistoryPage = () => {
 
     return (
         <div className="flex flex-col items-center p-2">
-            <h1 className="text-large font-bold mb-4">Histórico de Compras</h1>
+            <h1 className="text-lg font-semibold mb-2">Histórico</h1>
             {history.length > 0 ? (
                 <table className="w-fit bg-gray-100 rounded-md">
                     <thead>
-                        <tr>
+                        <tr className='p-2'>
                             <th className="py-2">Produto</th>
                             <th className="py-2">Categoria</th>
                             <th className="py-2">Ações</th>
@@ -58,15 +58,15 @@ const HistoryPage = () => {
                     <tbody>
                         {sortedHistory.map((item) => (
                             <tr key={item.id} className="border-b">
-                                <td className="py-2 px-4">{item.produto}</td>
-                                <td className="py-2 px-4">{item.categoria}</td>
-                                <td className="py-2 px-4 space-x-2">
+                                <td className="py-1 px-4">{item.produto}</td>
+                                <td className="py-1 px-4">{item.categoria}</td>
+                                <td className="py-1 px-4 space-x-1 space-y-1">
                                     <Button
                                         onClick={() => handleReturnToShoppingList(item.id)}
                                         variant='default'
-                                        className='bg-blue-500 text-sm'
+                                        className='bg-blue-500 text-xs'
                                     >
-                                        RECOMPRAR
+                                        Recomprar
                                     </Button>
                                     <Button
                                         onClick={() => handleDeleteFromHistory(item.id)}

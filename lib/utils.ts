@@ -21,5 +21,5 @@ export const categorias = [
     { label: "Higiene pessoal", value: "higiene" },
     { label: "Limpeza", value: "limpeza" },
     { label: "Padaria", value: "padaria" },
-    { label: "Verduras e Frutas", value: "verduras" },
+    { label: "Hortifrute", value: "hortifrute" },
 ] as const

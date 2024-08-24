@@ -60,11 +60,12 @@ const BuyPage = () => {
     const itemsByCategory = groupedAndSortedItems();
 
     return (
-        <div className="flex flex-col items-start p-2 mx-auto w-fit bg-gray-100">
-            <h1 className="text-xl font-bold mb-4">Lista de Compras</h1>
+        <div className="flex flex-col items-start p-2 mx-auto min-w-80 bg-gray-100 border">
+            <h1 className="flex items-center mx-auto text-lg font-semibold mb-2">Comprar</h1>
+            {shoppingList.length === 0 ? (<h2 className="flex items-center mx-auto text-md mb-2">Não há itens na lista de compras</h2>) : (<></>)}
             {Object.keys(itemsByCategory).map((category, catIndex) => (
-                <div key={catIndex} className="mb-6">
-                    <h2 className="text-md font-semibold mb-2">{category}</h2>
+                <div key={catIndex} className="ml-2 mb-2">
+                    <h2 className="text-lg font-semibold mb-1">{category}</h2>
                     <ul className="space-y-2">
                         {itemsByCategory[category].map((item) => (
                             <li key={item.id} className="flex items-center">
@@ -80,8 +81,8 @@ const BuyPage = () => {
                     </ul>
                 </div>
             ))}
-            <Button onClick={handleClearBoughtItems} className="mt-4">
-                REMOVER COMPRADOS
+            <Button onClick={handleClearBoughtItems} variant="destructive" className="mt-4 w-full" disabled={shoppingList.length === 0}>
+                Remover
             </Button>
         </div>
     )

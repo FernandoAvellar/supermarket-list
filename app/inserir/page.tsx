@@ -9,9 +9,7 @@ import { categorias, cn, item } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
     Command,
-    CommandEmpty,
     CommandGroup,
-    CommandInput,
     CommandItem,
     CommandList,
 } from "@/components/ui/command"
@@ -69,7 +67,7 @@ const InsertPage = () => {
                         name="produto"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Produto</FormLabel>
+                                <FormLabel className='text-md font-semibold'>Produto</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Digite o nome do produto" {...field} />
                                 </FormControl>
@@ -82,7 +80,7 @@ const InsertPage = () => {
                         name="categoria"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
-                                <FormLabel>Categoria</FormLabel>
+                                <FormLabel className='text-md font-semibold'>Categoria</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <FormControl>
@@ -103,14 +101,9 @@ const InsertPage = () => {
                                             </Button>
                                         </FormControl>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-[200px] p-0">
+                                    <PopoverContent className="w-fit">
                                         <Command>
-                                            <CommandInput
-                                                placeholder="Procurar..."
-                                                className="h-9"
-                                            />
                                             <CommandList>
-                                                <CommandEmpty>Não encontrado</CommandEmpty>
                                                 <CommandGroup>
                                                     {categorias.map((categoria) => (
                                                         <CommandItem
@@ -136,11 +129,10 @@ const InsertPage = () => {
                                         </Command>
                                     </PopoverContent>
                                 </Popover>
-                                <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className='w-full bg-blue-500 text-sm'>INSERIR</Button>
+                    <Button type="submit" className='w-full bg-blue-500 text-sm'>Inserir</Button>
                 </form>
             </div>
         </Form>
