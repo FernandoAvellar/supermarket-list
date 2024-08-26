@@ -44,33 +44,25 @@ const HistoryPage = () => {
     const sortedHistory = history.sort((a, b) => a.produto.localeCompare(b.produto));
 
     return (
-        <div className="flex flex-col items-center p-2">
-            <h1 className="text-lg font-semibold mb-2">Histórico</h1>
+        <div className="flex flex-col items-center justify-center p-2 text-sm">
             {history.length > 0 ? (
-                <table className="w-fit bg-gray-100 rounded-md">
-                    <thead>
-                        <tr className='p-2'>
-                            <th className="py-2">Produto</th>
-                            <th className="py-2">Categoria</th>
-                            <th className="py-2">Ações</th>
-                        </tr>
-                    </thead>
+                <table className="bg-gray-100 rounded-md min-w-96">
                     <tbody>
                         {sortedHistory.map((item) => (
-                            <tr key={item.id} className="border-b">
-                                <td className="py-1 px-4">{item.produto}</td>
-                                <td className="py-1 px-4">{item.categoria}</td>
-                                <td className="py-1 px-4 space-x-1 space-y-1">
+                            <tr key={item.id} className="">
+                                <td className="p-2">{item.produto}</td>
+                                <td className="flex items-center justify-center">
                                     <Button
                                         onClick={() => handleReturnToShoppingList(item.id)}
                                         variant='default'
-                                        className='bg-blue-500 text-xs'
+                                        className='bg-blue-500 text-xs px-2 m-1'
                                     >
                                         Recomprar
                                     </Button>
                                     <Button
                                         onClick={() => handleDeleteFromHistory(item.id)}
                                         variant="destructive"
+                                        className='text-xs px-2'
                                     >
                                         Apagar
                                     </Button>

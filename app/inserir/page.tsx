@@ -7,25 +7,9 @@ import { z } from "zod"
 import { Input } from "@/components/ui/input"
 import { categorias, cn, item } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import {
-    Command,
-    CommandGroup,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command"
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const InsertPage = () => {
     const [shoppingList, setShoppingList] = useState<Array<{ id: number; produto: string; categoria: string }>>([]);
@@ -45,29 +29,28 @@ const InsertPage = () => {
         },
     })
 
-    function generateId() {
-        // Generate a unique ID based on the current timestamp and a random number
+    function generateUniqueId() {
         return Date.now() + Math.floor(Math.random() * 1000);
     }
 
     function onSubmit(data: z.infer<typeof item>) {
-        const newItem = { id: generateId(), ...data }; // Add a unique id to each item
+        const newItem = { id: generateUniqueId(), ...data };
         const updatedList = [...shoppingList, newItem];
         setShoppingList(updatedList);
         localStorage.setItem('shoppingList', JSON.stringify(updatedList));
-        form.reset();
+        form.resetField("produto");
     }
 
     return (
         <Form {...form}>
-            <div className='flex flex-col gap-2 w-fit mx-auto items-center p-4 bg-gray-100 rounded-md'>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className='flex flex-col w-fit min-w-96 mx-auto items-center justify-center p-4 bg-gray-100 rounded-md'>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
                     <FormField
                         control={form.control}
                         name="produto"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className='text-md font-semibold'>Produto</FormLabel>
+                                <FormLabel className='text-sm font-semibold'>Produto</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Digite o nome do produto" {...field} />
                                 </FormControl>
@@ -80,7 +63,7 @@ const InsertPage = () => {
                         name="categoria"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
-                                <FormLabel className='text-md font-semibold'>Categoria</FormLabel>
+                                <FormLabel className='text-sm font-semibold'>Categoria</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <FormControl>
@@ -101,7 +84,7 @@ const InsertPage = () => {
                                             </Button>
                                         </FormControl>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-fit">
+                                    <PopoverContent className="w-40 m-0 p-0">
                                         <Command>
                                             <CommandList>
                                                 <CommandGroup>
@@ -116,7 +99,7 @@ const InsertPage = () => {
                                                             {categoria.label}
                                                             <CheckIcon
                                                                 className={cn(
-                                                                    "ml-auto h-4 w-4",
+                                                                    "ml-auto size-4",
                                                                     categoria.value === field.value
                                                                         ? "opacity-100"
                                                                         : "opacity-0"

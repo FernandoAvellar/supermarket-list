@@ -8,12 +8,10 @@ const BuyPage = () => {
     const [history, setHistory] = useState<{ id: number; produto: string; categoria: string }[]>([]);
 
     useEffect(() => {
-        // Load shopping list from localStorage when the component mounts
         const existingItems = localStorage.getItem('shoppingList');
         if (existingItems) {
             setShoppingList(JSON.parse(existingItems));
         }
-        // Load history from localStorage
         const existingHistory = localStorage.getItem('shoppingHistory');
         if (existingHistory) {
             setHistory(JSON.parse(existingHistory));
@@ -39,7 +37,6 @@ const BuyPage = () => {
         localStorage.setItem('shoppingHistory', JSON.stringify([...history, ...boughtItems.map(({ id, produto, categoria }) => ({ id, produto, categoria }))]));
     };
 
-    // Function to group items by category and sort them
     const groupedAndSortedItems = () => {
         const groupedItems: { [key: string]: { id: number; produto: string; categoria: string; bought: boolean }[] } = {};
 
@@ -60,15 +57,14 @@ const BuyPage = () => {
     const itemsByCategory = groupedAndSortedItems();
 
     return (
-        <div className="flex flex-col items-start p-2 mx-auto min-w-80 bg-gray-100 border">
-            <h1 className="flex items-center mx-auto text-lg font-semibold mb-2">Comprar</h1>
+        <div className="flex flex-col items-start p-2 mx-auto min-w-96 bg-gray-100 border">
             {shoppingList.length === 0 ? (<h2 className="flex items-center mx-auto text-md mb-2">Não há itens na lista de compras</h2>) : (<></>)}
             {Object.keys(itemsByCategory).map((category, catIndex) => (
-                <div key={catIndex} className="ml-2 mb-2">
-                    <h2 className="text-lg font-semibold mb-1">{category}</h2>
-                    <ul className="space-y-2">
+                <div key={catIndex} className="ml-2 mb-1">
+                    <h2 className="text-md font-medium mb-1">{category.charAt(0).toUpperCase() + category.slice(1)}</h2>
+                    <ul className="space-y-1">
                         {itemsByCategory[category].map((item) => (
-                            <li key={item.id} className="flex items-center">
+                            <li key={item.id} className="flex items-center text-sm">
                                 <Checkbox
                                     checked={item.bought}
                                     onCheckedChange={() => handleCheckboxChange(item.id)}
