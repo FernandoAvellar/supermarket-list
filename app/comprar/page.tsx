@@ -2,23 +2,27 @@
 import React, { useEffect, useState } from 'react'
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
-import { ShoppingItem, HistoryItem } from '@/types'
+import { ShoppingItem } from '@/types'
+import { Loader2 } from 'lucide-react';
 
 const BuyPage = () => {
     const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
-    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        async function fetchData() {
-            const shoppingResponse = await fetch('/api/get-items');
-            const shoppingData = await shoppingResponse.json();
-            setShoppingList(shoppingData);
-
-            const historyResponse = await fetch('/api/get-history');
-            const historyData = await historyResponse.json();
-            setHistory(historyData);
+        async function fetchShoppingList() {
+            setLoading(true);
+            try {
+                const response = await fetch('/api/get-items');
+                const data = await response.json();
+                setShoppingList(data);
+            } catch (error) {
+                console.error('Erro ao carregar a lista de compras:', error);
+            } finally {
+                setLoading(false);
+            }
         }
-        fetchData();
+        fetchShoppingList();
     }, []);
 
     const handleCheckboxChange = async (id: number) => {
@@ -27,6 +31,7 @@ const BuyPage = () => {
         );
         setShoppingList(updatedList);
 
+        // Atualizar o status do item no banco de dados
         await fetch(`/api/update-item/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -34,19 +39,25 @@ const BuyPage = () => {
         });
     };
 
-    const handleClearBoughtItems = async () => {
+    const handleRemoveItems = async () => {
         const boughtItems = shoppingList.filter(item => item.bought);
         const remainingItems = shoppingList.filter(item => !item.bought);
 
-        setShoppingList(remainingItems);
-        setHistory([...history, ...boughtItems.map(({ id, produto, categoria }) => ({ id, produto, categoria }))]);
+        try {
+            const response = await fetch('/api/move-to-history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(boughtItems.map(item => item.id)),
+            });
 
-        // Mover itens comprados para o histórico e removê-los da lista de compras
-        await fetch('/api/move-to-history', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(boughtItems),
-        });
+            if (!response.ok) {
+                throw new Error('Erro ao mover itens para o histórico.');
+            }
+
+            setShoppingList(remainingItems);
+        } catch (error) {
+            console.error('Erro ao remover itens comprados:', error);
+        }
     };
 
     const groupedAndSortedItems = () => {
@@ -67,6 +78,14 @@ const BuyPage = () => {
     };
 
     const itemsByCategory = groupedAndSortedItems();
+
+    if (loading) {
+        return (
+            <div className='flex flex-row items-center justify-center'>
+                <Loader2 size={20} className="animate-spin" /> &nbsp;Loading...
+            </div>
+        )
+    }
 
     return (
         <div className="flex flex-col items-start p-2 mx-auto min-w-96 bg-gray-100 border">
@@ -89,7 +108,7 @@ const BuyPage = () => {
                     </ul>
                 </div>
             ))}
-            <Button onClick={handleClearBoughtItems} variant="destructive" className="mt-4 w-full" disabled={shoppingList.length === 0}>
+            <Button onClick={handleRemoveItems} variant="destructive" className="mt-4 w-full" disabled={shoppingList.length === 0 || loading}>
                 Remover
             </Button>
         </div>

@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
 import { useForm } from "react-hook-form"
@@ -10,19 +10,10 @@ import { Button } from "@/components/ui/button"
 import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ShoppingItem } from '@/types'
+import { Loader2 } from 'lucide-react';
 
 const InsertPage = () => {
-    const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
-
-    useEffect(() => {
-        async function fetchItems() {
-            const response = await fetch('/api/get-items');
-            const data = await response.json();
-            setShoppingList(data);
-        }
-        fetchItems();
-    }, []);
+    const [loading, setLoading] = useState(false);
 
     const form = useForm<z.infer<typeof item>>({
         resolver: zodResolver(item),
@@ -32,25 +23,28 @@ const InsertPage = () => {
         },
     })
 
-
     async function onSubmit(data: z.infer<typeof item>) {
         try {
-            const response = await fetch('/api/add-item', {
+            setLoading(true);
+            await fetch('/api/add-item', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
-            if (response.ok) {
-                const newItem = await response.json();
-                setShoppingList([...shoppingList, newItem]);
-                form.resetField("produto");
-            } else {
-                console.error('Erro ao inserir item');
-            }
+            form.resetField("produto");
         } catch (error) {
             console.error('Erro ao inserir item:', error);
+        } finally {
+            setLoading(false);
         }
+    }
+
+    if (loading) {
+        return (
+            <div className='flex flex-row items-center justify-center'>
+                <Loader2 size={20} className="animate-spin" /> &nbsp;Loading...
+            </div>
+        )
     }
 
     return (

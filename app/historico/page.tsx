@@ -1,62 +1,72 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { ShoppingItem, HistoryItem } from '@/types'
+import { HistoryItem } from '@/types'
+import { Loader2 } from 'lucide-react';
 
 const HistoryPage: React.FC = () => {
     const [history, setHistory] = useState<HistoryItem[]>([]);
-    const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        async function fetchData() {
-            const historyResponse = await fetch('/api/get-history');
-            const historyData = await historyResponse.json();
-            setHistory(historyData);
-
-            const shoppingResponse = await fetch('/api/get-items');
-            const shoppingData = await shoppingResponse.json();
-            setShoppingList(shoppingData);
+        async function fetchHistory() {
+            setLoading(true);
+            try {
+                const response = await fetch('/api/get-history');
+                const data = await response.json();
+                setHistory(data);
+            } catch (error) {
+                console.error('Erro ao carregar o histórico:', error);
+            } finally {
+                setLoading(false);
+            }
         }
-        fetchData();
+        fetchHistory();
     }, []);
 
     const handleReturnToShoppingList = async (id: number) => {
-        const itemToReturn = history.find(item => item.id === id);
-        if (itemToReturn) {
-
-            const newItem: ShoppingItem = {
-                id: itemToReturn.id,
-                produto: itemToReturn.produto,
-                categoria: itemToReturn.categoria,
-                bought: false
-            };
-
-            const updatedShoppingList = [...shoppingList, newItem];
-            setShoppingList(updatedShoppingList);
-
-            // Atualizar o banco de dados
+        setLoading(true);
+        try {
+            // Enviar apenas o ID para a API
             await fetch('/api/return-to-shopping', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, produto: itemToReturn.produto, categoria: itemToReturn.categoria }),
+                body: JSON.stringify({ id }),
             });
 
-            // Remover o item do histórico
-            const updatedHistory = history.filter(item => item.id !== id);
-            setHistory(updatedHistory);
+            // Remover o item do histórico no estado local
+            setHistory(prevHistory => prevHistory.filter(item => item.id !== id));
+        } catch (error) {
+            console.error('Erro ao mover o item de volta para a lista de compras:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleDeleteFromHistory = async (id: number) => {
-        // Remover o item do histórico no banco de dados
-        await fetch(`/api/delete-from-history/${id}`, {
-            method: 'DELETE',
-        });
+        setLoading(true);
+        try {
+            // Remover o item do histórico no banco de dados
+            await fetch(`/api/delete-from-history/${id}`, {
+                method: 'DELETE',
+            });
 
-        // Atualizar o estado local
-        const updatedHistory = history.filter(item => item.id !== id);
-        setHistory(updatedHistory);
+            // Atualizar o estado local removendo o item do histórico
+            setHistory(prevHistory => prevHistory.filter(item => item.id !== id));
+        } catch (error) {
+            console.error('Erro ao deletar o item do histórico:', error);
+        } finally {
+            setLoading(false);
+        }
     };
+
+    if (loading) {
+        return (
+            <div className='flex flex-row items-center justify-center'>
+                <Loader2 size={20} className="animate-spin" /> &nbsp;Loading...
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center justify-center p-2 text-sm">
