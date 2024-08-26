@@ -10,15 +10,18 @@ import { Button } from "@/components/ui/button"
 import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { ShoppingItem } from '@/types'
 
 const InsertPage = () => {
-    const [shoppingList, setShoppingList] = useState<Array<{ id: number; produto: string; categoria: string }>>([]);
+    const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
 
     useEffect(() => {
-        const existingItems = localStorage.getItem('shoppingList');
-        if (existingItems) {
-            setShoppingList(JSON.parse(existingItems));
+        async function fetchItems() {
+            const response = await fetch('/api/get-items');
+            const data = await response.json();
+            setShoppingList(data);
         }
+        fetchItems();
     }, []);
 
     const form = useForm<z.infer<typeof item>>({
@@ -29,16 +32,25 @@ const InsertPage = () => {
         },
     })
 
-    function generateUniqueId() {
-        return Date.now() + Math.floor(Math.random() * 1000);
-    }
 
-    function onSubmit(data: z.infer<typeof item>) {
-        const newItem = { id: generateUniqueId(), ...data };
-        const updatedList = [...shoppingList, newItem];
-        setShoppingList(updatedList);
-        localStorage.setItem('shoppingList', JSON.stringify(updatedList));
-        form.resetField("produto");
+    async function onSubmit(data: z.infer<typeof item>) {
+        try {
+            const response = await fetch('/api/add-item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                const newItem = await response.json();
+                setShoppingList([...shoppingList, newItem]);
+                form.resetField("produto");
+            } else {
+                console.error('Erro ao inserir item');
+            }
+        } catch (error) {
+            console.error('Erro ao inserir item:', error);
+        }
     }
 
     return (

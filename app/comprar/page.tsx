@@ -2,43 +2,55 @@
 import React, { useEffect, useState } from 'react'
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
+import { ShoppingItem, HistoryItem } from '@/types'
 
 const BuyPage = () => {
-    const [shoppingList, setShoppingList] = useState<{ id: number; produto: string; categoria: string; bought: boolean }[]>([]);
-    const [history, setHistory] = useState<{ id: number; produto: string; categoria: string }[]>([]);
+    const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
+    const [history, setHistory] = useState<HistoryItem[]>([]);
 
     useEffect(() => {
-        const existingItems = localStorage.getItem('shoppingList');
-        if (existingItems) {
-            setShoppingList(JSON.parse(existingItems));
+        async function fetchData() {
+            const shoppingResponse = await fetch('/api/get-items');
+            const shoppingData = await shoppingResponse.json();
+            setShoppingList(shoppingData);
+
+            const historyResponse = await fetch('/api/get-history');
+            const historyData = await historyResponse.json();
+            setHistory(historyData);
         }
-        const existingHistory = localStorage.getItem('shoppingHistory');
-        if (existingHistory) {
-            setHistory(JSON.parse(existingHistory));
-        }
+        fetchData();
     }, []);
 
-    const handleCheckboxChange = (id: number) => {
+    const handleCheckboxChange = async (id: number) => {
         const updatedList = shoppingList.map(item =>
             item.id === id ? { ...item, bought: !item.bought } : item
         );
         setShoppingList(updatedList);
-        localStorage.setItem('shoppingList', JSON.stringify(updatedList));
+
+        await fetch(`/api/update-item/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bought: updatedList.find(item => item.id === id)?.bought }),
+        });
     };
 
-    const handleClearBoughtItems = () => {
+    const handleClearBoughtItems = async () => {
         const boughtItems = shoppingList.filter(item => item.bought);
         const remainingItems = shoppingList.filter(item => !item.bought);
 
         setShoppingList(remainingItems);
         setHistory([...history, ...boughtItems.map(({ id, produto, categoria }) => ({ id, produto, categoria }))]);
 
-        localStorage.setItem('shoppingList', JSON.stringify(remainingItems));
-        localStorage.setItem('shoppingHistory', JSON.stringify([...history, ...boughtItems.map(({ id, produto, categoria }) => ({ id, produto, categoria }))]));
+        // Mover itens comprados para o histórico e removê-los da lista de compras
+        await fetch('/api/move-to-history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(boughtItems),
+        });
     };
 
     const groupedAndSortedItems = () => {
-        const groupedItems: { [key: string]: { id: number; produto: string; categoria: string; bought: boolean }[] } = {};
+        const groupedItems: { [key: string]: ShoppingItem[] } = {};
 
         shoppingList.forEach(item => {
             if (!groupedItems[item.categoria]) {

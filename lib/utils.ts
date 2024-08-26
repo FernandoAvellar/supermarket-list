@@ -20,6 +20,5 @@ export const categorias = [
     { label: "Frios", value: "frios" },
     { label: "Higiene pessoal", value: "higiene" },
     { label: "Limpeza", value: "limpeza" },
-    { label: "Padaria", value: "padaria" },
     { label: "Hortifrute", value: "hortifrute" },
 ] as const

@@ -1,54 +1,69 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
+import { ShoppingItem, HistoryItem } from '@/types'
 
-const HistoryPage = () => {
-    const [history, setHistory] = useState<{ id: number; produto: string; categoria: string }[]>([]);
-    const [shoppingList, setShoppingList] = useState<{ id: number; produto: string; categoria: string; bought: boolean }[]>([]);
+const HistoryPage: React.FC = () => {
+    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
 
     useEffect(() => {
-        // Load history from localStorage when the component mounts
-        const existingHistory = localStorage.getItem('shoppingHistory');
-        if (existingHistory) {
-            setHistory(JSON.parse(existingHistory));
-        }
+        async function fetchData() {
+            const historyResponse = await fetch('/api/get-history');
+            const historyData = await historyResponse.json();
+            setHistory(historyData);
 
-        // Load shopping list from localStorage
-        const existingShoppingList = localStorage.getItem('shoppingList');
-        if (existingShoppingList) {
-            setShoppingList(JSON.parse(existingShoppingList));
+            const shoppingResponse = await fetch('/api/get-items');
+            const shoppingData = await shoppingResponse.json();
+            setShoppingList(shoppingData);
         }
+        fetchData();
     }, []);
 
-    const handleReturnToShoppingList = (id: number) => {
+    const handleReturnToShoppingList = async (id: number) => {
         const itemToReturn = history.find(item => item.id === id);
         if (itemToReturn) {
-            // Add the item back to the shopping list
-            const updatedShoppingList = [...shoppingList, { ...itemToReturn, bought: false }];
-            setShoppingList(updatedShoppingList);
-            localStorage.setItem('shoppingList', JSON.stringify(updatedShoppingList));
 
-            // Remove the item from history
+            const newItem: ShoppingItem = {
+                id: itemToReturn.id,
+                produto: itemToReturn.produto,
+                categoria: itemToReturn.categoria,
+                bought: false
+            };
+
+            const updatedShoppingList = [...shoppingList, newItem];
+            setShoppingList(updatedShoppingList);
+
+            // Atualizar o banco de dados
+            await fetch('/api/return-to-shopping', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, produto: itemToReturn.produto, categoria: itemToReturn.categoria }),
+            });
+
+            // Remover o item do histórico
             const updatedHistory = history.filter(item => item.id !== id);
             setHistory(updatedHistory);
-            localStorage.setItem('shoppingHistory', JSON.stringify(updatedHistory));
         }
     };
 
-    const handleDeleteFromHistory = (id: number) => {
+    const handleDeleteFromHistory = async (id: number) => {
+        // Remover o item do histórico no banco de dados
+        await fetch(`/api/delete-from-history/${id}`, {
+            method: 'DELETE',
+        });
+
+        // Atualizar o estado local
         const updatedHistory = history.filter(item => item.id !== id);
         setHistory(updatedHistory);
-        localStorage.setItem('shoppingHistory', JSON.stringify(updatedHistory));
     };
-
-    const sortedHistory = history.sort((a, b) => a.produto.localeCompare(b.produto));
 
     return (
         <div className="flex flex-col items-center justify-center p-2 text-sm">
             {history.length > 0 ? (
                 <table className="bg-gray-100 rounded-md min-w-96">
                     <tbody>
-                        {sortedHistory.map((item) => (
+                        {history.map((item) => (
                             <tr key={item.id} className="">
                                 <td className="p-2">{item.produto}</td>
                                 <td className="flex items-center justify-center">
