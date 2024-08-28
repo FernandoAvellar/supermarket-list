@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { HistoryItem } from '@/types'
 import { Loader2 } from 'lucide-react';
+import { deleteFromHistory, getHistory, returnToShopping } from '../actions/serverActions';
 
 const HistoryPage: React.FC = () => {
     const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -12,9 +13,8 @@ const HistoryPage: React.FC = () => {
         async function fetchHistory() {
             setLoading(true);
             try {
-                const response = await fetch('/api/get-history');
-                const data = await response.json();
-                setHistory(data);
+                const data = await getHistory();
+                setHistory(data)
             } catch (error) {
                 console.error('Erro ao carregar o histórico:', error);
             } finally {
@@ -27,13 +27,7 @@ const HistoryPage: React.FC = () => {
     const handleReturnToShoppingList = async (id: number) => {
         setLoading(true);
         try {
-            // Enviar apenas o ID para a API
-            await fetch('/api/return-to-shopping', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id }),
-            });
-
+            await returnToShopping(id);
             // Remover o item do histórico no estado local
             setHistory(prevHistory => prevHistory.filter(item => item.id !== id));
         } catch (error) {
@@ -46,11 +40,7 @@ const HistoryPage: React.FC = () => {
     const handleDeleteFromHistory = async (id: number) => {
         setLoading(true);
         try {
-            // Remover o item do histórico no banco de dados
-            await fetch(`/api/delete-from-history/${id}`, {
-                method: 'DELETE',
-            });
-
+            await deleteFromHistory(id);
             // Atualizar o estado local removendo o item do histórico
             setHistory(prevHistory => prevHistory.filter(item => item.id !== id));
         } catch (error) {

@@ -4,6 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { ShoppingItem } from '@/types'
 import { Loader2 } from 'lucide-react';
+import { getItems, moveToHistory, updateItem } from '../actions/serverActions'
 
 const BuyPage = () => {
     const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
@@ -13,8 +14,7 @@ const BuyPage = () => {
         async function fetchShoppingList() {
             setLoading(true);
             try {
-                const response = await fetch('/api/get-items');
-                const data = await response.json();
+                const data = await getItems();
                 setShoppingList(data);
             } catch (error) {
                 console.error('Erro ao carregar a lista de compras:', error);
@@ -31,12 +31,11 @@ const BuyPage = () => {
         );
         setShoppingList(updatedList);
 
-        // Atualizar o status do item no banco de dados
-        await fetch(`/api/update-item/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bought: updatedList.find(item => item.id === id)?.bought }),
-        });
+        try {
+            await updateItem(id, updatedList.find(item => item.id === id)?.bought ?? false);
+        } catch (error) {
+            console.error('Erro ao atualizar o status do item:', error);
+        }
     };
 
     const handleRemoveItems = async () => {
@@ -44,16 +43,7 @@ const BuyPage = () => {
         const remainingItems = shoppingList.filter(item => !item.bought);
 
         try {
-            const response = await fetch('/api/move-to-history', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(boughtItems.map(item => item.id)),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao mover itens para o histórico.');
-            }
-
+            await moveToHistory(boughtItems.map(item => item.id));
             setShoppingList(remainingItems);
         } catch (error) {
             console.error('Erro ao remover itens comprados:', error);

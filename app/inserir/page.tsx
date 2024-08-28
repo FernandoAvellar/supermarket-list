@@ -11,6 +11,7 @@ import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Loader2 } from 'lucide-react';
+import { addItem } from '../actions/serverActions'
 
 const InsertPage = () => {
     const [loading, setLoading] = useState(false);
@@ -26,11 +27,7 @@ const InsertPage = () => {
     async function onSubmit(data: z.infer<typeof item>) {
         try {
             setLoading(true);
-            await fetch('/api/add-item', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
+            await addItem(data.produto, data.categoria);
             form.resetField("produto");
         } catch (error) {
             console.error('Erro ao inserir item:', error);
