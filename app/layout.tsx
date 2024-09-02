@@ -19,12 +19,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
-      <body className={`${inter.className} flex flex-col min-h-screen bg-gray-200`}>
+      <body
+        className={`${inter.className} flex flex-col min-h-screen bg-gray-200`}
+      >
         <Header />
         <MenuNav />
         {children}
         <Footer />
       </body>
-    </html >
+    </html>
   );
 }

@@ -5,10 +5,10 @@ export default function Home() {
     <>
       <div className="flex items-center justify-center w-full">
         <Image
-          src='/images/cover.jpg'
+          src="/images/cover.jpg"
           width={350}
           height={350}
-          alt='Supermarket image'
+          alt="Supermarket image"
         />
       </div>
     </>
