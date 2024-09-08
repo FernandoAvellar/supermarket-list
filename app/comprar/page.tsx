@@ -101,11 +101,12 @@ const BuyPage = () => {
               </h2>
               <ul className="space-y-1">
                 {itemsByCategory[category].map((item) => (
-                  <li key={item.id} className="flex items-center text-sm">
-                    <Checkbox
-                      checked={item.bought}
-                      onCheckedChange={() => handleCheckboxChange(item.id)}
-                    />
+                  <li
+                    key={item.id}
+                    className="flex items-center text-md cursor-pointer p-1"
+                    onClick={() => handleCheckboxChange(item.id)}
+                  >
+                    <Checkbox checked={item.bought} />
                     <span
                       className={`ml-2 ${
                         item.bought && "line-through text-red-500"
