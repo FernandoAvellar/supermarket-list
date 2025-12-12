@@ -13,32 +13,37 @@ const MenuNav = () => {
     <nav className="flex p-3 items-center justify-center">
       <NavigationMenu>
         <NavigationMenuList>
-          <NavigationMenuItem>
-            <Link href="/comprar" legacyBehavior passHref>
-              <NavigationMenuLink
+           <NavigationMenuItem>
+            <NavigationMenuLink asChild>
+              <Link
+                href="/comprar"
                 className={`${navigationMenuTriggerStyle()} bg-gray-500 font-semibold`}
               >
                 COMPRAR
-              </NavigationMenuLink>
-            </Link>
+              </Link>
+            </NavigationMenuLink>
           </NavigationMenuItem>
+
           <NavigationMenuItem>
-            <Link href="/historico" legacyBehavior passHref>
-              <NavigationMenuLink
+            <NavigationMenuLink asChild>
+              <Link
+                href="/historico"
                 className={`${navigationMenuTriggerStyle()} bg-blue-500 font-semibold`}
               >
                 HISTÓRICO
-              </NavigationMenuLink>
-            </Link>
+              </Link>
+            </NavigationMenuLink>
           </NavigationMenuItem>
+
           <NavigationMenuItem>
-            <Link href="/inserir" legacyBehavior passHref>
-              <NavigationMenuLink
+            <NavigationMenuLink asChild>
+              <Link
+                href="/inserir"
                 className={`${navigationMenuTriggerStyle()} bg-green-500 font-semibold`}
               >
                 INSERIR
-              </NavigationMenuLink>
-            </Link>
+              </Link>
+            </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

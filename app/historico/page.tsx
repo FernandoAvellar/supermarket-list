@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HistoryItem } from "@/types";
 import { Loader2 } from "lucide-react";
@@ -12,7 +12,9 @@ import {
 const HistoryPage: React.FC = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const scrollPositionRef = useRef(0);
 
+  // Carrega histórico
   useEffect(() => {
     async function fetchHistory() {
       setLoading(true);
@@ -28,61 +30,61 @@ const HistoryPage: React.FC = () => {
     fetchHistory();
   }, []);
 
+  // Restaura o scroll sem perder a posição
+  const restoreScroll = () => {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, scrollPositionRef.current);
+    });
+  };
+
   const handleReturnToShoppingList = async (id: number) => {
+    scrollPositionRef.current = window.scrollY;
     setLoading(true);
+
     try {
       await returnToShopping(id);
-      // Remover o item do histórico no estado local
-      setHistory((prevHistory) => prevHistory.filter((item) => item.id !== id));
+      setHistory((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
-      console.error(
-        "Erro ao mover o item de volta para a lista de compras:",
-        error
-      );
+      console.error("Erro ao mover item:", error);
     } finally {
       setLoading(false);
+      restoreScroll();
     }
   };
 
   const handleDeleteFromHistory = async (id: number) => {
+    scrollPositionRef.current = window.scrollY;
     setLoading(true);
+
     try {
       await deleteFromHistory(id);
-      // Atualizar o estado local removendo o item do histórico
-      setHistory((prevHistory) => prevHistory.filter((item) => item.id !== id));
+      setHistory((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
-      console.error("Erro ao deletar o item do histórico:", error);
+      console.error("Erro ao deletar item:", error);
     } finally {
       setLoading(false);
+      restoreScroll();
     }
   };
 
   const groupedAndSortedHistory = () => {
-    const groupedItems: { [key: string]: HistoryItem[] } = {};
+    const grouped: { [key: string]: HistoryItem[] } = {};
 
     history.forEach((item) => {
-      if (!groupedItems[item.categoria]) {
-        groupedItems[item.categoria] = [];
-      }
-      groupedItems[item.categoria].push(item);
+      if (!grouped[item.categoria]) grouped[item.categoria] = [];
+      grouped[item.categoria].push(item);
     });
 
-    Object.keys(groupedItems).forEach((category) => {
-      groupedItems[category].sort((a, b) => a.produto.localeCompare(b.produto));
+    Object.keys(grouped).forEach((category) => {
+      grouped[category].sort((a, b) =>
+        a.produto.localeCompare(b.produto)
+      );
     });
 
-    return groupedItems;
+    return grouped;
   };
 
   const itemsByCategory = groupedAndSortedHistory();
-
-  if (loading) {
-    return (
-      <div className="flex flex-row items-center justify-center">
-        <Loader2 size={20} className="animate-spin" /> &nbsp;Loading...
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col items-center justify-center p-2 text-sm">
@@ -96,22 +98,35 @@ const HistoryPage: React.FC = () => {
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                   </td>
                 </tr>
+
                 {itemsByCategory[category].map((item) => (
-                  <tr key={item.id} className="">
+                  <tr key={item.id}>
                     <td className="p-2">{item.produto}</td>
+
                     <td className="flex items-center justify-end">
                       <Button
-                        onClick={() => handleReturnToShoppingList(item.id)}
+                        onClick={() =>
+                          handleReturnToShoppingList(item.id)
+                        }
+                        disabled={loading}
                         variant="default"
-                        className="bg-blue-500 text-xs px-2 m-1"
+                        className="bg-blue-500 text-xs px-2 m-1 flex items-center gap-1"
                       >
+                        {loading && (
+                          <Loader2 size={14} className="animate-spin" />
+                        )}
                         Recomprar
                       </Button>
+
                       <Button
                         onClick={() => handleDeleteFromHistory(item.id)}
+                        disabled={loading}
                         variant="destructive"
-                        className="text-xs px-1 mr-2"
+                        className="text-xs px-1 mr-2 flex items-center gap-1"
                       >
+                        {loading && (
+                          <Loader2 size={14} className="animate-spin" />
+                        )}
                         Apagar
                       </Button>
                     </td>
