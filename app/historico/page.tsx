@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HistoryItem } from "@/types";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import {
   deleteFromHistory,
   getHistory,
@@ -12,15 +12,23 @@ import {
 const HistoryPage: React.FC = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [openCategories, setOpenCategories] = useState<{ [key: string]: boolean }>({});
   const scrollPositionRef = useRef(0);
 
-  // Carrega histórico
   useEffect(() => {
     async function fetchHistory() {
       setLoading(true);
       try {
         const data = await getHistory();
         setHistory(data);
+
+        // inicia todas categorias abertas
+        const initialState: any = {};
+        data.forEach((item) => {
+          initialState[item.categoria] = true;
+        });
+        setOpenCategories(initialState);
+
       } catch (error) {
         console.error("Erro ao carregar o histórico:", error);
       } finally {
@@ -30,7 +38,6 @@ const HistoryPage: React.FC = () => {
     fetchHistory();
   }, []);
 
-  // Restaura o scroll sem perder a posição
   const restoreScroll = () => {
     requestAnimationFrame(() => {
       window.scrollTo(0, scrollPositionRef.current);
@@ -76,9 +83,7 @@ const HistoryPage: React.FC = () => {
     });
 
     Object.keys(grouped).forEach((category) => {
-      grouped[category].sort((a, b) =>
-        a.produto.localeCompare(b.produto)
-      );
+      grouped[category].sort((a, b) => a.produto.localeCompare(b.produto));
     });
 
     return grouped;
@@ -89,51 +94,72 @@ const HistoryPage: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center p-2 text-sm">
       {history.length > 0 ? (
-        <table className="bg-gray-100 rounded-md min-w-96">
+        <table className="bg-gray-100 rounded-md min-w-96 max-w-md w-auto mx-auto">
           <tbody>
-            {Object.keys(itemsByCategory).map((category, catIndex) => (
-              <React.Fragment key={catIndex}>
-                <tr className="bg-gray-200">
-                  <td colSpan={2} className="p-2 font-semibold text-left">
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </td>
-                </tr>
+            {Object.keys(itemsByCategory).map((category, catIndex) => {
+              const isOpen = openCategories[category] ?? false;
 
-                {itemsByCategory[category].map((item) => (
-                  <tr key={item.id}>
-                    <td className="p-2">{item.produto}</td>
-
-                    <td className="flex items-center justify-end">
-                      <Button
-                        onClick={() =>
-                          handleReturnToShoppingList(item.id)
-                        }
-                        disabled={loading}
-                        variant="default"
-                        className="bg-blue-500 text-xs px-2 m-1 flex items-center gap-1"
-                      >
-                        {loading && (
-                          <Loader2 size={14} className="animate-spin" />
-                        )}
-                        Recomprar
-                      </Button>
-
-                      <Button
-                        onClick={() => handleDeleteFromHistory(item.id)}
-                        disabled={loading}
-                        variant="destructive"
-                        className="text-xs px-1 mr-2 flex items-center gap-1"
-                      >
-                        {loading && (
-                          <Loader2 size={14} className="animate-spin" />
-                        )}
-                        Apagar
-                      </Button>
+              return (
+                <React.Fragment key={catIndex}>
+                  
+                  {/* Cabeçalho da categoria — clicável */}
+                  <tr
+                    className="bg-gray-200 cursor-pointer select-none"
+                    onClick={() =>
+                      setOpenCategories((prev) => ({
+                        ...prev,
+                        [category]: !prev[category],
+                      }))
+                    }
+                  >
+                    <td colSpan={2} className="p-2 font-semibold text-left">
+                    <div className="flex items-center gap-2">
+                      {isOpen ? (
+                        <ChevronDown size={16} />
+                      ) : (
+                        <ChevronRight size={16} />
+                      )}
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </div>
                     </td>
                   </tr>
-                ))}
-              </React.Fragment>
-            ))}
+
+                  {/* Itens da categoria (somente se aberta) */}
+                  {isOpen &&
+                    itemsByCategory[category].map((item) => (
+                      <tr key={item.id}>
+                        <td className="p-2">{item.produto}</td>
+
+                        <td className="flex items-center justify-end">
+                          <Button
+                            onClick={() => handleReturnToShoppingList(item.id)}
+                            disabled={loading}
+                            variant="default"
+                            className="bg-blue-500 text-xs px-2 m-1 flex items-center gap-1"
+                          >
+                            {loading && (
+                              <Loader2 size={14} className="animate-spin" />
+                            )}
+                            Recomprar
+                          </Button>
+
+                          <Button
+                            onClick={() => handleDeleteFromHistory(item.id)}
+                            disabled={loading}
+                            variant="destructive"
+                            className="text-xs px-1 mr-2 flex items-center gap-1"
+                          >
+                            {loading && (
+                              <Loader2 size={14} className="animate-spin" />
+                            )}
+                            Apagar
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                </React.Fragment>
+              );
+            })}
           </tbody>
         </table>
       ) : (
